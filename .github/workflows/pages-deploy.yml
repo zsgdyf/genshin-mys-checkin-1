@@ -1,0 +1,25 @@
+name: Genshin MYS Checkin
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 23 * * *'
+
+jobs:
+  checkin:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Random sleep
+        run: sleep $(($RANDOM % 600))
+
+      - name: Checkin
+        env:
+          COOKIE: ${{ secrets.COOKIE }}
+        run: yarn start
