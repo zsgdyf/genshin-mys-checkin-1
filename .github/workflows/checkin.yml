@@ -13,10 +13,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Sync with upstream
+        if: github.repository != 'Tsuk1ko/genshin-mys-checkin'
+        uses: aormsby/Fork-Sync-With-Upstream-action@v2.2
+        with:
+          upstream_repository: Tsuk1ko/genshin-mys-checkin
+          upstream_branch: main
+          target_branch: main
+          git_pull_args: '-s recursive -Xtheirs'
+
       - name: Install dependencies
+        if: always()
         run: yarn install
 
       - name: Random sleep
+        if: github.event_name == 'schedule'
         run: sleep $(($RANDOM % 600))
 
       - name: Checkin

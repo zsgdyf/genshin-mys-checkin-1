@@ -1,4 +1,5 @@
 const { get, post } = require('axios').default;
+const _get = require('lodash.get');
 const dvid = require('./dvid');
 const ds = require('./ds');
 
@@ -24,7 +25,11 @@ module.exports = class Client {
     return get('https://api-takumi.mihoyo.com/binding/api/getUserGameRolesByCookie?game_biz=hk4e_cn', {
       headers: this.headers,
     })
-      .then(({ data }) => data.data.list)
+      .then(({ data }) => {
+        const list = _get(data, 'data.list');
+        if (!list) throw new Error(JSON.stringify(data));
+        return list;
+      })
       .catch(e => {
         global.failed = true;
         console.error('角色信息请求失败');
@@ -41,10 +46,11 @@ module.exports = class Client {
     )
       .then(({ data }) => {
         console.log(maskUid(uid), region_name, data);
+        if (![0, -5003].includes(data.retcode)) global.failed = true;
       })
       .catch(e => {
         global.failed = true;
-        console.error('签到请求失败');
+        console.error(maskUid(uid), region_name, '签到请求失败');
         console.error(String(e));
       });
   }
