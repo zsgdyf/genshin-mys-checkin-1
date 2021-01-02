@@ -1,19 +1,22 @@
-const Client = require('./src/client');
+const MysClient = require('./src/mys/client');
 
 const sleep = (ms = Math.floor((1 + Math.random()) * 5000)) => new Promise(resolve => setTimeout(resolve, ms));
 
 (async () => {
-  for (const cookie of process.env.COOKIE.split('#')) {
-    const client = new Client(cookie);
+  // mys
+  for (const cookie of (process.env.COOKIE || '').split('#')) {
+    if (!cookie) continue;
 
-    const roles = await client.getRoles();
+    const mysClient = new MysClient(cookie);
+
+    const roles = await mysClient.getRoles();
     await sleep();
 
     for (const role of roles) {
-      await client.sign(role);
+      await mysClient.sign(role);
       await sleep();
     }
-
-    if (global.failed) process.exit(1);
   }
+
+  if (global.failed) process.exit(1);
 })();
