@@ -11,7 +11,9 @@
   },
   "dependencies": {
     "axios": "^0.21.1",
-    "lodash.get": "^4.4.2",
+    "cheerio": "^1.0.0-rc.5",
+    "js-base64": "^3.6.0",
+    "lodash": "^4.17.20",
     "md5": "^2.3.0",
     "qs": "^6.9.4",
     "randomstring": "^1.1.5",
