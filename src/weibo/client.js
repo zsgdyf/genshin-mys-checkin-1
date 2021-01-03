@@ -48,7 +48,7 @@ module.exports = class WbClient {
     }));
   }
 
-  checkin() {
+  checkin(retry = 0) {
     return get('https://api.weibo.cn/2/page/button', {
       params: {
         ...this.params,
@@ -56,9 +56,19 @@ module.exports = class WbClient {
       },
       headers: this.headers,
     })
-      .then(({ data }) => {
+      .then(async ({ data }) => {
         if (data.error_msg) {
-          if (!data.error_msg.includes('382004')) throw new Error(data.error_msg);
+          if (retry >= 10) {
+            console.log(data.error_msg);
+            throw new Error('失败次数过多，放弃签到');
+          }
+          if (data.error_msg.includes('(402003)')) {
+            console.log(data.error_msg);
+            console.log('将在5秒后重试');
+            await sleep(5000);
+            return this.checkin(retry + 1);
+          }
+          if (!data.error_msg.includes('(382004)')) throw new Error(data.error_msg);
           console.log(data.error_msg);
           return;
         }
