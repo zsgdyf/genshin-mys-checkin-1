@@ -31,6 +31,7 @@ jobs:
         run: sleep $(($RANDOM % 600))
 
       - name: Checkin
+        if: always()
         env:
           COOKIE: ${{ secrets.COOKIE }}
           WB_CONFIG: ${{ secrets.WB_CONFIG }}
