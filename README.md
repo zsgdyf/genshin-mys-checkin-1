@@ -33,10 +33,10 @@
 ```json
 [
   {
-    "url": "(1)",
-    "cookie": "(2)",
-    "webhook": "(3)",
-    "proxy": "(4)",
+    "url": "",
+    "cookie": "",
+    "webhook": "",
+    "proxy": "",
     "outputScheme": false
   }
 ]
