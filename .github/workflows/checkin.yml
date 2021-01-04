@@ -12,9 +12,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.ACCESS_TOKEN }}
 
       - name: Sync with upstream
         if: github.repository != 'Tsuk1ko/genshin-mys-checkin'
+        continue-on-error: true
         uses: aormsby/Fork-Sync-With-Upstream-action@v2.2
         with:
           upstream_repository: Tsuk1ko/genshin-mys-checkin
@@ -23,7 +26,6 @@ jobs:
           git_pull_args: '-s recursive -Xtheirs'
 
       - name: Install dependencies
-        if: always()
         run: yarn install
 
       - name: Random sleep
@@ -31,7 +33,6 @@ jobs:
         run: sleep $(($RANDOM % 600))
 
       - name: Checkin
-        if: always()
         env:
           COOKIE: ${{ secrets.COOKIE }}
           WB_CONFIG: ${{ secrets.WB_CONFIG }}

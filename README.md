@@ -2,7 +2,18 @@
 
 - 每天早上 7:00 ~ 7:10 随机时间签到
 - 部分失败不会使整体流程终止，并且你会收到一封来自 GitHub 的 Actions 失败提醒邮件
-- 运行前会自动同步本仓库，并使用本仓库文件解决冲突，如有自定义需求请自行修改 workflows
+- 运行前会自动同步主仓库，并使用主仓库文件解决冲突，如有自定义需求请自行修改 workflows
+
+## 【重要】关于自动同步上游
+
+主仓库可能会修改 workflow 配置文件，而 GitHub Actions 默认提供的 token 只有 repo 权限而没有 workflow 权限，因此会同步失败
+
+有两种解决方案：
+
+1. 到 [Personal access tokens](https://github.com/settings/tokens) 生成一个 token，勾选 workflow 即可，然后写入 `ACCESS_TOKEN` secrets
+2. 如果你不愿意或不放心使用 token，可以自行同步主仓库，具体 git 命令我就不写了，如果懒的话也可以删除仓库重新 fork
+
+项目建立初期修修补补可能有时会改到 workflow，稳定后应该就不会怎么动了
 
 ## 米游社
 
