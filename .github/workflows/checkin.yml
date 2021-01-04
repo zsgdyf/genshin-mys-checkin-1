@@ -13,7 +13,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          token: ${{ secrets.ACCESS_TOKEN }}
+          token: ${{ secrets.ACCESS_TOKEN || github.token }}
 
       - name: Sync with upstream
         if: github.repository != 'Tsuk1ko/genshin-mys-checkin'
