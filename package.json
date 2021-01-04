@@ -12,11 +12,14 @@
   "dependencies": {
     "axios": "^0.21.1",
     "cheerio": "^1.0.0-rc.5",
+    "fs-extra": "^9.0.1",
+    "https-proxy-agent": "^5.0.0",
     "js-base64": "^3.6.0",
     "lodash": "^4.17.20",
     "md5": "^2.3.0",
     "qs": "^6.9.4",
     "randomstring": "^1.1.5",
+    "socks-proxy-agent": "^5.0.0",
     "uuid": "^8.3.2"
   }
 }

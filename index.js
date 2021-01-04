@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const Fs = require('fs-extra');
 const Base64 = require('js-base64');
 const { get } = require('axios');
 const MysClient = require('./src/mys/client');
@@ -9,11 +10,19 @@ _.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
 const sleep = (ms = Math.floor((1 + Math.random()) * 5000)) => new Promise(resolve => setTimeout(resolve, ms));
 
 const getWbConfig = () => {
+  if (Fs.existsSync('wbconfig.json')) {
+    try {
+      return Fs.readJsonSync('wbconfig.json');
+    } catch (error) {
+      console.error('wbconfig.json 格式错误');
+      console.error(String(e));
+    }
+  }
   if (!Base64.isValid(process.env.WB_CONFIG)) return [];
   try {
     return JSON.parse(Base64.decode(process.env.WB_CONFIG));
   } catch (e) {
-    console.error('微博签到配置错误');
+    console.error('WB_CONFIG 配置错误');
     console.error(String(e));
   }
   return [];
@@ -36,11 +45,11 @@ const getWbConfig = () => {
   }
 
   // weibo
-  for (const [i, { url, cookie, webhook }] of Object.entries(getWbConfig())) {
+  for (const [i, { webhook, ...config }] of Object.entries(getWbConfig())) {
     console.log(`WB[${i}]`);
-    const wbClient = new WbClient(url, cookie);
+    const wbClient = new WbClient(config);
 
-    await wbClient.checkin();
+    if (!(await wbClient.checkin())) continue;
     await sleep();
 
     const giftList = await wbClient.getGiftList().catch(e => {
@@ -66,6 +75,7 @@ const getWbConfig = () => {
       console.log('暂无可领取礼包');
       continue;
     }
+    await sleep();
 
     const code = await wbClient.getGiftCode(gift);
     if (!code) continue;
