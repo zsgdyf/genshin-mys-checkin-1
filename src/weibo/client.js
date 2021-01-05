@@ -31,7 +31,6 @@ module.exports = class WbClient {
         containerid,
       },
       headers: this.headers,
-      ...(this.agent ? { httpsAgent: this.agent } : {}),
     });
 
     const list = (() => {
@@ -62,42 +61,56 @@ module.exports = class WbClient {
       ...(this.agent ? { httpsAgent: this.agent } : {}),
     })
       .then(async ({ data }) => {
+        if (data.result == 1) {
+          console.log(`签到成功，${_.get(data, 'button.name')}`);
+          return true;
+        }
         const errMsg = data.error_msg || data.msg;
-        if (data.result === 402004) {
-          console.log(errMsg);
+        if (data.result == 402004) {
+          console.error(errMsg);
           if (this.outputScheme && data.scheme) console.log(data.scheme);
           return false;
         }
         if (errMsg) {
           if (retry >= 10) {
-            console.log(errMsg);
-            throw new Error('失败次数过多，放弃签到');
+            global.failed = true;
+            console.error(errMsg);
+            console.error('失败次数过多，放弃签到');
+            return false;
           }
           if (errMsg.includes('(402003)')) {
-            console.log(errMsg);
+            console.error(errMsg);
             console.log('将在5秒后重试');
             await sleep(5000);
             return this.checkin(retry + 1);
           }
-          if (!errMsg.includes('(382004)')) throw new Error(errMsg);
-          console.log(errMsg);
+          if (!errMsg.includes('(382004)')) {
+            global.failed = true;
+            console.error(errMsg);
+            return false;
+          }
+          console.error(errMsg);
           return false;
         }
-        console.log(`签到成功，${_.get(data, 'button.name')}`);
-        return true;
+        console.error('未知错误');
+        return false;
       })
       .catch(e => {
-        global.failed = true;
-        console.error('签到请求失败');
-        console.error(String(e));
-        return false;
+        if (retry >= 10) {
+          global.failed = true;
+          console.error('失败次数过多，放弃签到');
+          console.error(e.toString());
+          return false;
+        }
+        console.error('签到请求失败，进行重试');
+        console.error(e.toString());
+        return this.checkin(retry + 1);
       });
   }
 
   async getMyGiftBox() {
     const { data } = await get('https://ka.sina.com.cn/html5/mybox', {
       headers: this.kaHeaders,
-      ...(this.agent ? { httpsAgent: this.agent } : {}),
     });
     const $ = load(data);
     return Array.from($('.gift-box .deleBtn')).map(el => $(el).attr('data-itemid'));
@@ -117,16 +130,17 @@ module.exports = class WbClient {
           channel: 'wblink',
         })}`,
       },
-      ...(this.agent ? { httpsAgent: this.agent } : {}),
     })
       .then(async ({ data: { msg, data } }) => {
         if (data && data.kahao) {
           console.log(`「${name}」领取成功`);
           return data.kahao;
         }
-        console.log(`「${name}」领取失败：${String(msg).replace(/亲爱的.+?，/, '')}`);
+        console.error(`「${name}」领取失败：${String(msg).replace(/亲爱的.+?，/, '')}`);
         if (retry >= 10) {
-          throw new Error('失败次数过多，放弃领取');
+          global.failed = true;
+          console.error('失败次数过多，放弃签到');
+          return;
         }
         if (msg.includes('领卡拥挤')) {
           console.log('将在5秒后重试');
@@ -137,7 +151,7 @@ module.exports = class WbClient {
       .catch(e => {
         global.failed = true;
         console.error('礼包领取请求失败');
-        console.error(String(e));
+        console.error(e.toString());
       });
   }
 };

@@ -27,13 +27,17 @@ module.exports = class MysClient {
     })
       .then(({ data }) => {
         const list = _.get(data, 'data.list');
-        if (!list) throw new Error(JSON.stringify(data));
+        if (!list) {
+          global.failed = true;
+          console.error(JSON.stringify(data));
+          return;
+        }
         return list;
       })
       .catch(e => {
         global.failed = true;
         console.error('角色信息请求失败');
-        console.error(String(e));
+        console.error(e.toString());
         return [];
       });
   }
@@ -51,7 +55,7 @@ module.exports = class MysClient {
       .catch(e => {
         global.failed = true;
         console.error(maskUid(uid), region_name, '签到请求失败');
-        console.error(String(e));
+        console.error(e.toString());
       });
   }
 };

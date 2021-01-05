@@ -15,7 +15,7 @@ const getWbConfig = () => {
       return Fs.readJsonSync('wbconfig.json');
     } catch (error) {
       console.error('wbconfig.json 格式错误');
-      console.error(String(e));
+      console.error(e.toString());
     }
   }
   if (!Base64.isValid(process.env.WB_CONFIG)) return [];
@@ -23,7 +23,7 @@ const getWbConfig = () => {
     return JSON.parse(Base64.decode(process.env.WB_CONFIG));
   } catch (e) {
     console.error('WB_CONFIG 配置错误');
-    console.error(String(e));
+    console.error(e.toString());
   }
   return [];
 };
@@ -55,7 +55,7 @@ const getWbConfig = () => {
     const giftList = await wbClient.getGiftList().catch(e => {
       global.failed = true;
       console.error('礼包列表请求失败');
-      console.error(String(e));
+      console.error(e.toString());
     });
     if (!giftList) continue;
     if (!giftList.length) {
@@ -66,7 +66,7 @@ const getWbConfig = () => {
     const myGiftBox = await wbClient.getMyGiftBox().catch(e => {
       global.failed = true;
       console.error('已领取礼包列表请求失败');
-      console.error(String(e));
+      console.error(e.toString());
     });
     if (!myGiftBox) continue;
 
@@ -86,7 +86,7 @@ const getWbConfig = () => {
         .catch(e => {
           global.failed = true;
           console.error('Webhook 调用失败');
-          console.error(String(e));
+          console.error(e.toString());
         });
     }
   }
