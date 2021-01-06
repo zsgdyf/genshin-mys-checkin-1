@@ -49,7 +49,7 @@ const getWbConfig = () => {
     console.log(`WB[${i}]`);
     const wbClient = new WbClient(config);
 
-    if (!(await wbClient.checkin())) continue;
+    await wbClient.checkin();
     await sleep();
 
     const giftList = await wbClient.getGiftList().catch(e => {
