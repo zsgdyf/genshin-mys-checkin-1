@@ -65,7 +65,7 @@ module.exports = class WbClient {
           console.log(`签到成功，${_.get(data, 'button.name')}`);
           return true;
         }
-        const errMsg = data.error_msg || data.msg;
+        const errMsg = data.error_msg || data.errmsg || data.msg;
         if (data.result == 402004) {
           console.error(errMsg);
           if (this.outputScheme && data.scheme) console.log(data.scheme);
