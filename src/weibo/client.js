@@ -87,7 +87,19 @@ module.exports = class WbClient {
     );
   }
 
-  async login() {
+  login() {
+    return retryPromise(
+      () => this._login().then(() => true),
+      e => {
+        _warn('登录失败，进行重试', e.toString());
+      },
+    ).catch(e => {
+      _err('登录失败', e.toString());
+      return false;
+    });
+  }
+
+  async _login() {
     if (await this.isLoggedin()) {
       _log('Cookie 有效，无需重新登陆');
       return;
@@ -171,13 +183,11 @@ module.exports = class WbClient {
             }
           }),
       e => {
-        _err('签到请求失败，进行重试');
-        _err(e.toString());
+        _warn('签到请求失败，进行重试', e.toString());
       },
     ).catch(e => {
       global.failed = true;
-      _err('签到请求失败');
-      _err(e.toString());
+      _err('签到请求失败', e.toString());
     });
   }
 
@@ -222,8 +232,7 @@ module.exports = class WbClient {
       })
       .catch(e => {
         global.failed = true;
-        _err('礼包领取请求失败');
-        _err(e.toString());
+        _err('礼包领取请求失败', e.toString());
       });
   }
 

@@ -37,8 +37,7 @@ module.exports = class MysClient {
       })
       .catch(e => {
         global.failed = true;
-        _err('角色信息请求失败');
-        _err(e.toString());
+        _err('角色信息请求失败', e.toString());
         return [];
       });
   }
@@ -55,8 +54,7 @@ module.exports = class MysClient {
       })
       .catch(e => {
         global.failed = true;
-        _err(maskUid(uid), region_name, '签到请求失败');
-        _err(e.toString());
+        _err(maskUid(uid), region_name, '签到请求失败', e.toString());
       });
   }
 };

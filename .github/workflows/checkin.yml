@@ -25,6 +25,14 @@ jobs:
           target_branch: main
           git_pull_args: '-s recursive -Xtheirs'
 
+      - name: Cache
+        uses: actions/cache@v2
+        with:
+          path: cache
+          key: gc-cache-v1
+          restore-keys: |
+            gc-cache-
+
       - name: Install dependencies
         run: yarn install
 

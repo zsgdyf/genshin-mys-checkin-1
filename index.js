@@ -3,7 +3,6 @@ const _ = require('lodash');
 const Fs = require('fs-extra');
 const Base64 = require('js-base64');
 const { get } = require('axios').default;
-const Cache = require('./src/utils/cache');
 const MysClient = require('./src/mys/client');
 const WbClient = require('./src/weibo/client');
 
@@ -16,16 +15,14 @@ const getWbConfig = () => {
     try {
       return Fs.readJsonSync('wbconfig.json');
     } catch (error) {
-      _err('wbconfig.json 格式错误');
-      _err(e.toString());
+      _err('wbconfig.json 格式错误', e.toString());
     }
   }
   if (!Base64.isValid(process.env.WB_CONFIG)) return [];
   try {
     return JSON.parse(Base64.decode(process.env.WB_CONFIG));
   } catch (e) {
-    _err('WB_CONFIG 配置错误');
-    _err(e.toString());
+    _err('WB_CONFIG 配置错误', e.toString());
   }
   return [];
 };
@@ -52,14 +49,10 @@ const getWbConfig = () => {
    */
   const wbconfig = getWbConfig();
   if (wbconfig.length) {
-    // 恢复缓存
-    await Cache.restore();
-
     // 获取礼包列表
     const giftList = await WbClient.getGiftList().catch(e => {
       global.failed = true;
-      _err('礼包列表请求失败');
-      _err(e.toString());
+      _err('礼包列表请求失败', e.toString());
       return [];
     });
 
@@ -73,7 +66,7 @@ const getWbConfig = () => {
 
       // 签到
       const wbClient = new WbClient(config);
-      await wbClient.login();
+      if (!(await wbClient.login())) continue;
       await wbClient.checkin();
 
       // 确定需要领取的礼包
@@ -83,8 +76,7 @@ const getWbConfig = () => {
       }
       const myGiftBox = await wbClient.getMyGiftBox().catch(e => {
         global.failed = true;
-        _err('已领取礼包列表请求失败');
-        _err(e.toString());
+        _err('已领取礼包列表请求失败', e.toString());
       });
       if (!myGiftBox) continue;
       const gift = giftList.find(({ id }) => !myGiftBox.includes(id));
@@ -103,14 +95,10 @@ const getWbConfig = () => {
           .then(() => _log('Webhook 调用成功'))
           .catch(e => {
             global.failed = true;
-            _err('Webhook 调用失败');
-            _err(e.toString());
+            _err('Webhook 调用失败', e.toString());
           });
       }
     }
-
-    // 保存缓存
-    await Cache.save();
   }
 
   if (global.failed) _setFailed();

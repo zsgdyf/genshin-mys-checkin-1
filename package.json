@@ -10,7 +10,6 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "@actions/cache": "^1.0.6",
     "@actions/core": "^1.2.6",
     "axios": "^0.21.1",
     "axios-cookiejar-support": "^1.0.1",
