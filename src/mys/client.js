@@ -1,4 +1,4 @@
-const { _log, _err } = require('../utils/log');
+const { _log, _warn, _err } = require('../utils/log');
 const _ = require('lodash');
 const { get, post } = require('axios').default;
 const dvid = require('./dvid');
@@ -49,8 +49,17 @@ module.exports = class MysClient {
       { headers: { ...this.headers, ds: ds() } },
     )
       .then(({ data }) => {
-        _log(maskUid(uid), region_name, data);
-        if (![0, -5003].includes(data.retcode)) global.failed = true;
+        (() => {
+          switch (data.retcode) {
+            case 0:
+              return _log;
+            case -5003:
+              return _warn;
+            default:
+              global.failed = true;
+              return _err;
+          }
+        })()(maskUid(uid), region_name, JSON.stringify(data));
       })
       .catch(e => {
         global.failed = true;

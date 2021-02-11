@@ -61,7 +61,7 @@ const getWbConfig = () => {
       _log(`WB[${i}]`);
       if (!config.alc) {
         global.failed = true;
-        _warn('请查看 README 并更新微博签到配置');
+        _err('请查看 README 并更新微博签到配置');
       }
 
       // 签到
