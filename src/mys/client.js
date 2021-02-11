@@ -1,5 +1,6 @@
+const { _log, _err } = require('../utils/log');
 const _ = require('lodash');
-const { get, post } = require('axios');
+const { get, post } = require('axios').default;
 const dvid = require('./dvid');
 const ds = require('./ds');
 
@@ -29,15 +30,15 @@ module.exports = class MysClient {
         const list = _.get(data, 'data.list');
         if (!list) {
           global.failed = true;
-          console.error(JSON.stringify(data));
+          _err(JSON.stringify(data));
           return;
         }
         return list;
       })
       .catch(e => {
         global.failed = true;
-        console.error('角色信息请求失败');
-        console.error(e.toString());
+        _err('角色信息请求失败');
+        _err(e.toString());
         return [];
       });
   }
@@ -49,13 +50,13 @@ module.exports = class MysClient {
       { headers: { ...this.headers, ds: ds() } },
     )
       .then(({ data }) => {
-        console.log(maskUid(uid), region_name, data);
+        _log(maskUid(uid), region_name, data);
         if (![0, -5003].includes(data.retcode)) global.failed = true;
       })
       .catch(e => {
         global.failed = true;
-        console.error(maskUid(uid), region_name, '签到请求失败');
-        console.error(e.toString());
+        _err(maskUid(uid), region_name, '签到请求失败');
+        _err(e.toString());
       });
   }
 };

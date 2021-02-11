@@ -19,7 +19,7 @@
 ## 米游社
 
 - 支持多帐号及多角色
-- 如果角色信息请求失败，提示登陆失效，请退出米游社再重新登录，然后更新 cookie
+- 如果角色信息请求失败，提示登陆失效，请在米游社网页登出，然后重新登录，更新 cookie
 
 ### Secrets
 
@@ -32,10 +32,10 @@
 - [y1ndan/genshin-impact-helper](https://github.com/y1ndan/genshin-impact-helper)
 - [yinghualuowu/GenshinDailyHelper](https://github.com/yinghualuowu/GenshinDailyHelper)
 
-## 微博超话（试作型）
+## 微博超话（试作型v2）
 
 - 自动签到、领取礼包，并可以通过 webhook 发送兑换码，支持多帐号
-- 配置较为繁琐，有一定使用门槛（懂的都懂，不懂的我也没办法）
+- 有一定使用门槛（懂的都懂，不懂的我也没办法）
 - 可能无法通过 GitHub Actions 使用
 
 ### 准备
@@ -45,27 +45,18 @@
 ```json
 [
   {
-    "url": "",
-    "cookie": "",
+    "alc": "",
     "webhook": "",
-    "proxy": "",
-    "outputScheme": false
+    "proxy": ""
   }
 ]
 ```
 
-#### `url`
+#### `alc`
 
-使用 whistle 之类的抓包工具，微博手机客户端进入原神超话得到 API 链接，安卓/iOS均可
-
-※ 该链接开头为 `https://api.weibo.cn/2/page`，其实也不一定要这个开头的链接，只要链接带有 `gsid` `from` `c` `s` 四个参数即可
-
-#### `cookie`
-
-有两种方式可以获得：
-
-1. https://m.weibo.cn
-2. 使用抓包工具，在微博手机客户端内访问某些页面，例如领取原神超话签到礼包的页面
+1. PC 登录[新浪网](https://www.sina.com.cn/)
+2. 进入[这个页面](https://login.sina.com.cn/sso/test)，会 404，不用管
+3. F12 开发者工具 - Application - Cookies，将 `ALC` 的值填入即可
 
 #### `webhook`（可选）
 
@@ -82,16 +73,12 @@
 
 签到使用的代理，支持 http / https / socks
 
-#### `outputScheme`（可选，默认 `false`）
-
-行为存在异常时是否输出验证链接，通过 GitHub Actions 使用时建议 `false`，防止信息泄露
-
 ### 使用
 
 因为异地签到会出现“行为存在异常”问题，因此只建议两种使用方式：
 
 1. 在常用地使用，如何自动化请自行解决
-2. 搞一个常用地的代理，配置 `proxy`，这样可能可以在 GitHub Actions 中成功签到，你可以在本地配好先试试
+2. 搞一个常用地的代理，配置 `proxy`，这样可以在 GitHub Actions 中成功签到，你可以在本地配好先试试
 
 #### 在本地使用
 
@@ -100,3 +87,7 @@
 #### 在 GitHub Actions 上使用
 
 将上面构造好的 JSON 进行 base64 编码，设置为 `WB_CONFIG` secrets
+
+### 参考
+
+- [happy888888/WeiboTask](https://github.com/happy888888/WeiboTask)
