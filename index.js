@@ -33,7 +33,7 @@ const getWbConfig = () => {
    */
   const mysCookies = (process.env.COOKIE || '').split('#').filter(cookie => cookie);
   if (mysCookies.length) {
-    _log('MYS');
+    _log('\nMYS');
     for (const cookie of mysCookies) {
       const mysClient = new MysClient(cookie);
       const roles = await mysClient.getRoles();
@@ -58,7 +58,7 @@ const getWbConfig = () => {
 
     for (const [i, { webhook, ...config }] of Object.entries(wbconfig)) {
       await sleep();
-      _log(`WB[${i}]`);
+      _log(`\nWB[${i}]`);
       if (!config.alc) {
         global.failed = true;
         _err('请查看 README 并更新微博签到配置');
@@ -100,6 +100,8 @@ const getWbConfig = () => {
       }
     }
   }
+
+  _log();
 
   if (global.failed) _setFailed();
 })();
