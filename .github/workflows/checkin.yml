@@ -26,6 +26,7 @@ jobs:
           git_pull_args: '-s recursive -Xtheirs'
 
       - name: Cache
+        if: secrets.WB_CONFIG
         uses: actions/cache@v2
         with:
           path: cache
