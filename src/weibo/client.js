@@ -13,8 +13,13 @@ const retryPromise = require('../utils/retryPromise');
 
 const CACHE_DIR = Path.resolve(__dirname, '../../cache/');
 const CONTAINER_ID = '100808fc439dedbb06ca5fd858848e521b8716';
-const UA =
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36';
+const AXIOS_COMMON_CONFIG = {
+  headers: {
+    'user-agent':
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36',
+  },
+  withCredentials: true,
+};
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -23,21 +28,16 @@ module.exports = class WbClient {
     this.cookieCacheFile = Path.resolve(CACHE_DIR, `${md5(alc)}.cookie.json`);
     const httpsAgent = getAgent(proxy);
 
-    this.cookieJar = new CookieJar();
+    this.cookieJar = this.loadCookieFromCache();
     this.cookieJar.setCookieSync(`ALC=${alc}`, 'https://login.sina.com.cn/');
-    this.loadCookieFromCache();
 
-    this.axios = axios.create({
-      headers: { 'user-agent': UA },
-      withCredentials: true,
-    });
+    this.axios = axios.create(AXIOS_COMMON_CONFIG);
     axiosCookieJarSupport(this.axios);
     this.axios.defaults.jar = this.cookieJar;
 
     if (httpsAgent) {
       this.proxyAxios = axios.create({
-        headers: { 'user-agent': UA },
-        withCredentials: true,
+        ...AXIOS_COMMON_CONFIG,
         httpsAgent,
       });
       axiosCookieJarSupport(this.proxyAxios);
@@ -46,29 +46,18 @@ module.exports = class WbClient {
   }
 
   loadCookieFromCache() {
-    if (!Fs.existsSync(this.cookieCacheFile)) return;
+    if (!Fs.existsSync(this.cookieCacheFile)) return new CookieJar();
     _log('读取 cookie 缓存');
-    const cookies = Fs.readJsonSync(this.cookieCacheFile).map(obj => Cookie.fromJSON(obj));
-    cookies.forEach(cookie => {
-      this.cookieJar.setCookieSync(cookie, `https://${cookie.domain}`);
-    });
+    try {
+      return CookieJar.fromJSON(Fs.readJsonSync(this.cookieCacheFile));
+    } catch (error) {
+      return new CookieJar();
+    }
   }
 
   saveCookieToCache() {
-    const cookiesNeedSave = [];
-
-    const weiboCookies = this.cookieJar.getCookiesSync('https://weibo.com');
-    const weiboSubCookie = weiboCookies.find(cookie => cookie.key === 'SUB');
-    if (weiboSubCookie) cookiesNeedSave.push(weiboSubCookie.toJSON());
-
-    const sinaCookies = this.cookieJar.getCookiesSync('https://sina.com.cn');
-    const sinaSubCookies = sinaCookies.filter(cookie => ['SUB', 'SUBP'].includes(cookie.key));
-    if (sinaSubCookies.length) cookiesNeedSave.push(...sinaSubCookies.map(cookie => cookie.toJSON()));
-
-    if (cookiesNeedSave.length) {
-      _log('保存 cookie 至缓存');
-      Fs.writeJsonSync(this.cookieCacheFile, cookiesNeedSave);
-    }
+    _log('保存 cookie 至缓存');
+    Fs.writeJsonSync(this.cookieCacheFile, this.cookieJar.toJSON());
   }
 
   check200(url) {
